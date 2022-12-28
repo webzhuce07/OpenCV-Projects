@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.0)
+project(ImageSegmentation)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+find_package(OpenCV REQUIRED)
+add_executable(ImageSegmentation main.cpp EGBS.cpp EGBS.h graph.cpp graph.h DisjointSet.cpp DisjointSet.h)
+target_link_libraries(ImageSegmentation ${OpenCV_LIBS})
