@@ -35,13 +35,13 @@ using namespace cv;
 
 double WienerFilterImpl(const Mat& src, Mat& dst, double noiseVariance, const Size& block){
 
-	assert(("Invalid block dimensions", block.width % 2 == 1 && block.height % 2 == 1 && block.width > 1 && block.height > 1));
+	//assert(("Invalid block dimensions", block.width % 2 == 1 && block.height % 2 == 1 && block.width > 1 && block.height > 1));
 	assert(("src and dst must be one channel grayscale images", src.channels() == 1, dst.channels() == 1));
 	
 	int h = src.rows;
 	int w = src.cols;
 
-	dst = Mat1b(h, w);
+	dst = Mat(h, w, src.type());
 
 	Mat1d means, sqrMeans, variances;
 	Mat1d avgVarianceMat; 
@@ -59,18 +59,40 @@ double WienerFilterImpl(const Mat& src, Mat& dst, double noiseVariance, const Si
 		noiseVariance = avgVarianceMat(0, 0) / (h*w);
 	}
 
-	for (int r = 0; r < h; ++r){
-		// get row pointers
-		uchar const * const srcRow = src.ptr<uchar>(r);
-		uchar * const dstRow = dst.ptr<uchar>(r);
-		double * const varRow = variances.ptr<double>(r);
-		double * const meanRow = means.ptr<double>(r);
-		for (int c = 0; c < w; ++c) {
-			dstRow[c] = saturate_cast<uchar>(
-				meanRow[c] + max(0., varRow[c] - noiseVariance) / max(varRow[c], noiseVariance) * (srcRow[c] - meanRow[c])
-			);
+	int num = src.type();
+
+	if (0 == num)
+	{
+		for (int r = 0; r < h; ++r) {
+			// get row pointers
+			uchar const * const srcRow = src.ptr<uchar>(r);
+			uchar * const dstRow = dst.ptr<uchar>(r);
+			double * const varRow = variances.ptr<double>(r);
+			double * const meanRow = means.ptr<double>(r);
+			for (int c = 0; c < w; ++c) {
+				dstRow[c] = saturate_cast<uchar>(
+					meanRow[c] + max(0., varRow[c] - noiseVariance) / max(varRow[c], noiseVariance) * (srcRow[c] - meanRow[c])
+					);
+			}
 		}
 	}
+	else if (5 == num)
+	{
+		for (int r = 0; r < h; ++r) {
+			// get row pointers
+			float const * const srcRow = src.ptr<float>(r);
+			float * const dstRow = dst.ptr<float>(r);
+			double * const varRow = variances.ptr<double>(r);
+			double * const meanRow = means.ptr<double>(r);
+			for (int c = 0; c < w; ++c) {
+				dstRow[c] = saturate_cast<float>(
+					meanRow[c] + max(0., varRow[c] - noiseVariance) / max(varRow[c], noiseVariance) * (srcRow[c] - meanRow[c])
+					);
+			}
+		}
+	}
+
+	
 
 	return noiseVariance;
 }

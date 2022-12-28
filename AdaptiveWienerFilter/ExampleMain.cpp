@@ -45,9 +45,10 @@ int main(void)
 	// This main applies the Adaptive Wiener Filter on a simple example
 	// image and save results in the project installation folder
 
-	string testImage = "2.jpg";
-	Mat1b src = imread(testImage, 0);
-	Mat1b dst3x3, dst5x5, dst5x5_fixedNoise;
+	string testImage = "test.jpg";
+	Mat1f src = imread(testImage, 0);
+    
+	Mat1f dst3x3, dst5x5, dst5x5_fixedNoise;
 
 	if (src.empty()){
 		cout << "The specified image '" << testImage << "' does not exists" << endl;
@@ -57,17 +58,21 @@ int main(void)
 	double estimatedNoiseVariance;
 
 	// Call to WienerFilter function with a 3x3 kernel and estimated noise variances
-	estimatedNoiseVariance = WienerFilter(src, dst3x3, Size(3, 3));
+	estimatedNoiseVariance = WienerFilter(src, dst3x3, Size(5, 1));
 
 	// Call to WienerFilter function with default 5x5 kernel estimated noise variances
-	estimatedNoiseVariance = WienerFilter(src, dst5x5);
+	estimatedNoiseVariance = WienerFilter(src, dst5x5, Size(5, 5));
 
 	// Call to WienerFilter function with a default 5x5 kernel and fixed noise variances
 	WienerFilter(src, dst5x5_fixedNoise, 5000);
 
-	imwrite("Filtered3X3.png", dst3x3);
+	imwrite("Filtered5X1.png", dst3x3);
 	imwrite("Filtered5X5.png", dst5x5);
 	imwrite("Filtered5X5_fixedNoise.png", dst5x5_fixedNoise);
+
+	estimatedNoiseVariance = WienerFilter(src, dst3x3, Size(1, 5));
+	imwrite("Filtered1X5.png", dst3x3);
+	imwrite("Filtered5X11.png", src);
 
 	return 0;
 }
